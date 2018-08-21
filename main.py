@@ -11,11 +11,11 @@ W = 200
 H = 150
 
 
-train_imgs,train_lbls,test_imgs,test_lbls = get_test_train(0.5,img_width=W, img_height=H)
+train_imgs,train_lbls,test_imgs,test_lbls = get_test_train(0.7,img_width=W, img_height=H)
 my_cnn = cnn.cnn(img_width=W, img_height=H)
 
 batch_size = 50
-epochs = 200
+epochs = 400
 # train
 print(np.shape(train_imgs))
 #exit()
@@ -27,6 +27,7 @@ history = my_cnn.fit(x=train_imgs,             # Input should be (train_cases, 1
                      validation_data=(test_imgs, test_lbls)
                      )
 
+print(np.max(history.history['val_acc']))
 plt.figure()
 plt.plot(history.history['acc'],label='train accuracy')
 plt.plot(history.history['val_acc'],label='test accuracy')
