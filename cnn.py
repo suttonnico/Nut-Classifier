@@ -6,15 +6,20 @@ import matplotlib.pylab as plt
 from sets_generator import get_test_train
 def cnn(img_width=640, img_height=480):
     # https://www.kaggle.com/crawford/lung-infiltration-cnn-with-keras-on-chest-x-rays
-    layer_C1 = 20
-    layer_C2 = 20
-    layer_C3 = 30
-    dense_layer = 100
+    layer_C1 = 40
+    layer_C2 = 60
+    layer_C3 = 60
+    dense_layer = 200
     model = models.Sequential()
-    model.add(layers.Conv2D(layer_C1, (3, 3), input_shape=(img_height,img_width,3)))  # the 1 is because greyscale (1 chan)
+    model.add(layers.Conv2D(layer_C1, (5, 5), input_shape=(img_height,img_width,3),strides=4))  # the 1 is because greyscale (1 chan)
     model.add(layers.BatchNormalization())
     model.add(layers.Activation("relu"))
     model.add(layers.MaxPool2D((3,3)))
+    model.add(layers.Dropout(0.2))
+    model.add(layers.Conv2D(layer_C2, (3, 3)))  # the 1 is because greyscale (1 chan)
+    model.add(layers.BatchNormalization())
+    model.add(layers.Activation("relu"))
+    model.add(layers.MaxPool2D((2, 2)))
     model.add(layers.Dropout(0.2))
 
     model.add(layers.Flatten())

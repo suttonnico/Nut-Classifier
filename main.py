@@ -6,16 +6,16 @@ import matplotlib.pylab as plt
 import cnn
 from sets_generator import get_test_train
 from keras.callbacks import ModelCheckpoint
+size = 150
+W = 2*size
+H = 2*size
 
-W = 200
-H = 150
 
-
-train_imgs,train_lbls,test_imgs,test_lbls = get_test_train(0.7,img_width=W, img_height=H)
+train_imgs,train_lbls,test_imgs,test_lbls = get_test_train(0.7,dif=size)
 my_cnn = cnn.cnn(img_width=W, img_height=H)
 
 batch_size = 50
-epochs = 400
+epochs = 500
 # train
 print(np.shape(train_imgs))
 #exit()
