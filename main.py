@@ -15,7 +15,7 @@ train_imgs,train_lbls,test_imgs,test_lbls = get_test_train(0.7,dif=size)
 my_cnn = cnn.cnn(img_width=W, img_height=H)
 
 batch_size = 50
-epochs = 500
+epochs = 5
 # train
 print(np.shape(train_imgs))
 #exit()
@@ -26,7 +26,7 @@ history = my_cnn.fit(x=train_imgs,             # Input should be (train_cases, 1
                      verbose=2,
                      validation_data=(test_imgs, test_lbls)
                      )
-
+my_cnn.save('model.h5')
 print(np.max(history.history['val_acc']))
 plt.figure()
 plt.plot(history.history['acc'],label='train accuracy')

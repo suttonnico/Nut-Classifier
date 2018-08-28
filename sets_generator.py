@@ -60,14 +60,12 @@ def get_test_train(percentage,dif = 150):
     imgs_files = [f for f in os.listdir(nut_dir)]
 
     images = []
-    i=0
+
     for f in imgs_files:
-        i += 1
-        # print(f)
+        print(f)
         img = cv2.imread(os.path.join(nut_dir, f))  # img.shape ~ (2919, 3000)
-        img = get_nut(img)
-        print(np.shape(img))
-        #img = cv2.resize(img,(img_width, img_height))
+        #img = get_nut(img)
+        img = cv2.resize(img,(2*dif, 2*dif))
         images.append(img)
     inds = np.arange(len(labels))
     np.random.shuffle(inds)
