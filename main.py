@@ -6,6 +6,8 @@ import matplotlib.pylab as plt
 import cnn
 from sets_generator import get_test_train
 from keras.callbacks import ModelCheckpoint
+from keras.callbacks import TensorBoard
+from time import time
 size = 150
 W = 2*size
 H = 2*size
@@ -15,16 +17,19 @@ train_imgs,train_lbls,test_imgs,test_lbls = get_test_train(0.7,dif=size)
 my_cnn = cnn.cnn(img_width=W, img_height=H)
 
 batch_size = 50
-epochs = 5
+epochs = 500
 # train
 print(np.shape(train_imgs))
 #exit()
+
+tensorboard = TensorBoard(log_dir="logs/{}".format(time()))
+
 history = my_cnn.fit(x=train_imgs,             # Input should be (train_cases, 128, 128, 1)
                      y=train_lbls,
                      batch_size=batch_size,
                      epochs=epochs,
                      verbose=2,
-                     validation_data=(test_imgs, test_lbls)
+                     validation_data=(test_imgs, test_lbls),callbacks=[tensorboard]
                      )
 my_cnn.save('model.h5')
 print(np.max(history.history['val_acc']))

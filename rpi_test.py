@@ -25,3 +25,4 @@ for i in range(N):
     #imwrite("filename.jpg",img) #save image
 end = time.time()
 print((end-start)/N)
+

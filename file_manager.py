@@ -10,22 +10,22 @@ def zero_pad(x,n):
 
 
 #DO NOT RUN
-nut_dir = 'data/nuts'
+nut_dir = 'data/nuts_hd'
 imgs_files = [f for f in os.listdir(nut_dir)]
 last_nut = 0
 for f in imgs_files:
     last_nut+=1
-new_nut_dir = 'nuez_12'
-good_or_bad = 0
+new_nut_dir = 'nuez_mala'
+good_or_bad = 1
 
-labels = np.genfromtxt('data/labels.csv', delimiter=',')
+labels = np.genfromtxt('data/labels_hd.csv', delimiter=',')
 
 new_imgs_files = [f for f in os.listdir(new_nut_dir)]
 for f in new_imgs_files:
     img = cv2.imread(os.path.join(new_nut_dir, f))
-    #cv2.imwrite(nut_dir+'/nuez_'+zero_pad(last_nut,4)+'.png', img);
+    cv2.imwrite(nut_dir+'/nuez_'+zero_pad(last_nut,4)+'.png', img);
     last_nut += 1
     labels=np.append(labels,int(good_or_bad))
 
-print(labels)
-#np.savetxt("data/labels.csv", labels, delimiter=",")
+#print(labels)
+np.savetxt("data/labels_hd.csv", labels, delimiter=",")
