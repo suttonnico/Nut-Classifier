@@ -7,17 +7,20 @@ def zero_pad(x,n):
             return (n-i)*'0'+str(x)
 
 
-cam_1 = cv2.VideoCapture(1)   # 0 -> index of camera
+cam_1 = cv2.VideoCapture(0)   # 0 -> index of camera
 
-cam_2 = cv2.VideoCapture(2)   # 0 -> index of camera
+cam_2 = cv2.VideoCapture(1)   # 0 -> index of camera
 nut_dir = 'data/recinto'
-
-
-for i in range(N):
-    s, img_1 = cam_1.read()
-    s, img_2 = cam_2.read()
-    cv2.imwrite(nut_dir + '/nuez_' + zero_pad(i, 4) + '_1.png', img_1)
-    cv2.imwrite(nut_dir + '/nuez_' + zero_pad(i, 4) + '_2.png', img_2)
+class camera_man:
+    i = 0
+    def __init__(self,i):
+        self.i = i
+    def shoot(self):
+        s, img_1 = cam_1.read()
+        s, img_2 = cam_2.read()
+        cv2.imwrite('recinto1_L/nuez_' + zero_pad(self.i, 6) + '.png', img_1)
+        cv2.imwrite('recinto1_R/nuez_' + zero_pad(self.i, 6) + '.png', img_2)
+        self.i = self.i +1
 
 
 Ariiba = '1 cm'
