@@ -8,24 +8,52 @@ def zero_pad(x,n):
         if x < 10 ** i:
             return (n-i)*'0'+str(x)
 
+def getNutId(x):
+    return(x[4])
+
+def subNutId(x,id):
+    s = list(x)
+    s[4] = id
+    return "".join(s)
+
+def getNutNumber(x):
+    return(x[6:len(x)-4])
 
 #DO NOT RUN
-nut_dir = 'data/nuts_hd'
+nut_dir = 'data_posta/dataset'
+nut_dir_sep = 'data_posta/dataset_sep'
 imgs_files = [f for f in os.listdir(nut_dir)]
 last_nut = 0
 for f in imgs_files:
     last_nut+=1
-new_nut_dir = 'nuez_mala'
-good_or_bad = 1
+new_nut_dir = 'data_posta/bad_01'
+good_or_bad = 1 #1= mala 0 = nuez buena
 
-labels = np.genfromtxt('data/labels_hd.csv', delimiter=',')
+labels = []#np.genfromtxt('data_posta/dataset/labels.csv', delimiter=',')
+
+
+pairs = {
+    '0':'6',
+    '2':'4'
+}
 
 new_imgs_files = [f for f in os.listdir(new_nut_dir)]
 for f in new_imgs_files:
-    img = cv2.imread(os.path.join(new_nut_dir, f))
-    cv2.imwrite(nut_dir+'/nuez_'+zero_pad(last_nut,4)+'.png', img);
-    last_nut += 1
-    labels=np.append(labels,int(good_or_bad))
+    id = getNutId(f)
+    num = getNutNumber(f)
+    print("ID: "+id)
+    print("NUM: "+num)
+    if id in pairs:
+        pair_id = pairs[id]
+        img_org = cv2.imread(os.path.join(new_nut_dir, f))
+        img_pair = cv2.imread(os.path.join(new_nut_dir, subNutId(f,pair_id)))
+        img = np.concatenate((img_org, img_pair), axis=1)
+        cv2.imwrite(nut_dir_sep + '/nuezR_' + zero_pad(last_nut, 6) + '.png', img_org);
+        cv2.imwrite(nut_dir_sep + '/nuezL_' + zero_pad(last_nut, 6) + '.png', img_pair);
+        cv2.imwrite(nut_dir+'/nuez_'+zero_pad(last_nut,6)+'.png', img);
+        last_nut += 1
+        labels=np.append(labels,int(good_or_bad))
 
-#print(labels)
-np.savetxt("data/labels_hd.csv", labels, delimiter=",")
+print(labels)
+np.savetxt('data_posta/dataset/labels.csv', labels, delimiter=",")
+np.savetxt('data_posta/dataset_sep/labels.csv', labels, delimiter=",")
