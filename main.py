@@ -4,7 +4,7 @@ import itertools
 import numpy as np
 import matplotlib.pylab as plt
 import cnn
-from sets_generator import get_test_train
+from sets_generator import get_test_train_sep
 from keras.callbacks import ModelCheckpoint
 from keras.callbacks import TensorBoard
 from time import time
@@ -13,7 +13,7 @@ W = 2*size
 H = 2*size
 
 
-train_imgs,train_lbls,test_imgs,test_lbls = get_test_train(0.7,dif=size)
+train_imgs,train_lbls,test_imgs,test_lbls = get_test_train_sep(0.7,dif=size)
 my_cnn = cnn.cnn(img_width=W, img_height=H)
 
 batch_size = 50

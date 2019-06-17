@@ -3,7 +3,17 @@ import os
 import cv2
 import matplotlib.pyplot as plt
 import imutils
+import file_manager as fm
 
+kernel = np.ones((5,5), np.uint8)
+
+pairs = {
+    '0':'6',
+    '2':'4'
+}
+
+def getSide(x):
+    return x[4]
 
 greenLower = (0, 0, 0)
 greenUpper = (255, 150, 150)
@@ -14,10 +24,52 @@ def lp(img):
     convoleOutput = cv2.filter2D(img,-1, smallBlur)
     return convoleOutput
 
-def get_nut(img,dif=150):
+
+def get_nut(img, id, dif=150):
+    empty = cv2.imread('data_posta/empty/empty' + id + '.png')
     plt.figure()
     plt.imshow(img)
     plt.show()
+    plt.figure()
+    plt.imshow(empty)
+    plt.show()
+
+    th = 140
+
+    empty_gray = cv2.cvtColor(empty, cv2.COLOR_BGR2GRAY)
+    trash, empty_BW = cv2.threshold(empty_gray, th, 255, cv2.THRESH_BINARY)
+    img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    trash, img_BW = cv2.threshold(img_gray, th, 255, cv2.THRESH_BINARY)
+    its = 50
+    diff = cv2.dilate(cv2.erode(img, None, iterations=its) - cv2.erode(empty, None, iterations=its), kernel,
+                      iterations=its)
+    plt.imshow(diff, cmap='gray')
+
+    #diff = empty_BW-img_BW
+    plt.figure()
+    plt.imshow(img_BW)
+    plt.show()
+    plt.figure()
+    plt.imshow(empty_BW)
+    plt.show()
+
+    plt.figure()
+    plt.imshow(diff)
+    plt.show()
+
+
+def get_nut_old(img,id,dif=150):
+    empty=cv2.imread('data/empty/empty'+id+'.png')
+    plt.figure()
+    plt.imshow(img)
+    plt.show()
+
+    th = 140
+
+    empty_gray = cv2.cvtColor(empty, cv2.COLOR_BGR2GRAY)
+    trash, empty_BW = cv2.threshold(empty_gray, th, 255, cv2.THRESH_BINARY)
+
+
 
     blurred = cv2.GaussianBlur(img, (11, 11), 0)
     hsv = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
@@ -116,21 +168,28 @@ def get_nut(img,dif=150):
     plt.show()
     return img[up_limit:low_limit,left_limit:right_limit,:]
 
-def get_test_train(percentage,dif = 150):
-    nut_dir = 'data/nuts_hd'
+def get_test_train_sep(percentage,dif = 150):
+    nut_dir = 'data_posta/dataset_sep'
 
-    labels = np.genfromtxt('data/labels_hd.csv', delimiter=',')
+    labels = np.genfromtxt('data_posta/dataset_sep/labels.csv', delimiter=',')
     imgs_files = [f for f in os.listdir(nut_dir)]
 
     images = []
 
     for f in imgs_files:
-        print(f)
-        img = cv2.imread(os.path.join(nut_dir, f))  # img.shape ~ (2919, 3000)
-        get_nut(img)
+        id = fm.getNutId(f)
+        num = fm.getNutNumber(f)
+        if id in pairs:
+            img_org = cv2.imread(os.path.join(nut_dir, f))  # img.shape ~ (2919, 3000)
+            img_pair = cv2.imread(os.path.join(nut_dir, fm.subNutId(f,pairs[id])))
+            img = np.concatenate((img_org, img_pair), axis=1)
+            #get_nut(img_org,id)
         #img = get_nut(img)
-        img = cv2.resize(img,(2*dif, 2*dif))
-        images.append(img)
+            img = cv2.resize(img,(4*dif, 2*dif))
+           # plt.figure()
+           # plt.imshow(img[:,:,::-1])
+           # plt.show()
+            images.append(img)
     inds = np.arange(len(labels))
     np.random.shuffle(inds)
     sh_images = []
