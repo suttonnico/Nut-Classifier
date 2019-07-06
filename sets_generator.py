@@ -4,6 +4,7 @@ import cv2
 import matplotlib.pyplot as plt
 import imutils
 import file_manager as fm
+import test
 
 kernel = np.ones((5,5), np.uint8)
 
@@ -26,7 +27,7 @@ def lp(img):
 
 
 def get_nut(img, id, dif=150):
-    empty = cv2.imread('data_posta/empty/empty' + id + '.png')
+    empty = cv2.imread('data_cinta/empty/empty' + id + '.png')
     plt.figure()
     plt.imshow(img)
     plt.show()
@@ -169,18 +170,21 @@ def get_nut_old(img,id,dif=150):
     return img[up_limit:low_limit,left_limit:right_limit,:]
 
 def get_test_train_sep(percentage,dif = 150):
-    nut_dir = 'data_posta/dataset_sep'
+    nut_dir = 'data_cinta/dataset_sep'
 
-    labels = np.genfromtxt('data_posta/dataset_sep/labels.csv', delimiter=',')
+    labels = np.genfromtxt('data_cinta/dataset_sep/labels.csv', delimiter=',')
     imgs_files = [f for f in os.listdir(nut_dir)]
 
     images = []
-
+    i = 0
     for f in imgs_files:
         id = fm.getNutId(f)
         num = fm.getNutNumber(f)
         if id in pairs:
             img_org = cv2.imread(os.path.join(nut_dir, f))  # img.shape ~ (2919, 3000)
+            empty = cv2.imread('data_cinta/empty/empty' + id + '.png')
+            if labels[i] == 0:
+                test.findRadius(img_org,empty)
             img_pair = cv2.imread(os.path.join(nut_dir, fm.subNutId(f,pairs[id])))
             img = np.concatenate((img_org, img_pair), axis=1)
             #get_nut(img_org,id)
@@ -190,6 +194,7 @@ def get_test_train_sep(percentage,dif = 150):
            # plt.imshow(img[:,:,::-1])
            # plt.show()
             images.append(img)
+        i += 1
     inds = np.arange(len(labels))
     np.random.shuffle(inds)
     sh_images = []
@@ -209,5 +214,48 @@ def get_test_train_sep(percentage,dif = 150):
             test_imgs.append(sh_images[i])
             test_lbls.append(sh_labels[i])
     return np.array(train_imgs),np.array(train_lbls),np.array(test_imgs),np.array(test_lbls)
+
+
+def get_test_train_sel(percentage,dif = 50):
+    nut_dir = 'selection/bad_01'
+    nut_dir_out = 'selection/bad_01_out'
+    imgs_files = [f for f in os.listdir(nut_dir)]
+
+    images = []
+    images_out = []
+    for f in imgs_files:
+
+        img = cv2.imread(os.path.join(nut_dir, f))  # img.shape ~ (2919, 3000)
+            #get_nut(img_org,id)
+        img = cv2.resize(img,(2*dif, 2*dif))
+        img_out =cv2.imread(os.path.join(nut_dir_out, f))
+        img_out = cv2.resize(img,(2*dif, 2*dif))
+        img_out = cv2.cvtColor(img_out, cv2.COLOR_BGR2GRAY)
+        bausra, img_out = cv2.threshold(img_out, 145, 255, cv2.THRESH_BINARY)
+           # plt.figure()
+           # plt.imshow(img[:,:,::-1])
+           # plt.show()
+        images.append(img)
+        images_out.append(np.reshape(img_out,(2*dif)**2))
+        print(np.shape(images_out))
+    inds = np.arange(len(images))
+    np.random.shuffle(inds)
+    sh_images = []
+    sh_out = []
+    for i in range(len(inds)):
+        sh_images.append(images[inds[i]])
+        sh_out.append(images_out[inds[i]])
+    train_imgs = []
+    train_out = []
+    test_imgs = []
+    test_out = []
+    for i in range(len(inds)):
+        if i/len(inds) < percentage:
+            train_imgs.append(sh_images[i])
+            train_out.append(sh_out[i])
+        else:
+            test_imgs.append(sh_images[i])
+            test_out.append(sh_out[i])
+    return np.array(train_imgs),np.array(train_out),np.array(test_imgs),np.array(test_out)
 
 

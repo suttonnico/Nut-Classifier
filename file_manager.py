@@ -22,17 +22,18 @@ def getNutNumber(x):
 #DO NOT RUN
 
 if __name__ == '__main__':
-
-    nut_dir = 'data_posta/dataset'
-    nut_dir_sep = 'data_posta/dataset_sep'
+    exit(123)
+    nut_dir = 'data_cinta/dataset'
+    nut_dir_sep = 'data_cinta/dataset_sep'
     imgs_files = [f for f in os.listdir(nut_dir)]
     last_nut = 0
     for f in imgs_files:
         last_nut+=1
-    new_nut_dir = 'data_posta/good_04'
+    new_nut_dir = 'data_cinta/good_03'
     good_or_bad = 0 #1= mala 0 = nuez buena
 
-    labels = np.genfromtxt('data_posta/dataset/labels.csv', delimiter=',')
+
+    labels =  np.genfromtxt('data_cinta/dataset/labels.csv', delimiter=',')
 
 
     pairs = {
@@ -58,5 +59,5 @@ if __name__ == '__main__':
             labels=np.append(labels,int(good_or_bad))
 
     print(labels)
-    np.savetxt('data_posta/dataset/labels.csv', labels, delimiter=",")
-    np.savetxt('data_posta/dataset_sep/labels.csv', labels, delimiter=",")
+    np.savetxt('data_cinta/dataset/labels.csv', labels, delimiter=",")
+    np.savetxt('data_cinta/dataset_sep/labels.csv', labels, delimiter=",")
