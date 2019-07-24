@@ -22,15 +22,15 @@ def getNutNumber(x):
 #DO NOT RUN
 
 if __name__ == '__main__':
-    exit(123)
+    exit()
     nut_dir = 'data_cinta/dataset'
     nut_dir_sep = 'data_cinta/dataset_sep'
     imgs_files = [f for f in os.listdir(nut_dir)]
     last_nut = 0
     for f in imgs_files:
         last_nut+=1
-    new_nut_dir = 'data_cinta/good_03'
-    good_or_bad = 0 #1= mala 0 = nuez buena
+    new_nut_dir = 'data_cinta/bad_01'
+    good_or_bad = 1 #1= mala 0 = nuez buena
 
 
     labels =  np.genfromtxt('data_cinta/dataset/labels.csv', delimiter=',')
@@ -52,8 +52,8 @@ if __name__ == '__main__':
             img_org = cv2.imread(os.path.join(new_nut_dir, f))
             img_pair = cv2.imread(os.path.join(new_nut_dir, subNutId(f,pair_id)))
             img = np.concatenate((img_org, img_pair), axis=1)
-            cv2.imwrite(nut_dir_sep + '/nuez'+id+'_' + zero_pad(last_nut, 6) + '.png', img_org);
-            cv2.imwrite(nut_dir_sep + '/nuez'+pair_id+'_' + zero_pad(last_nut, 6) + '.png', img_pair);
+            cv2.imwrite(nut_dir_sep + '/nuez'+ zero_pad(last_nut, 6) +'_' +id+ '.png', img_org);
+            cv2.imwrite(nut_dir_sep + '/nuez'+ zero_pad(last_nut, 6) +'_' +pair_id+ '.png', img_pair);
             cv2.imwrite(nut_dir+'/nuez_'+zero_pad(last_nut,6)+'.png', img);
             last_nut += 1
             labels=np.append(labels,int(good_or_bad))
