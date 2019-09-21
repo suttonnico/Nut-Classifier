@@ -4,7 +4,6 @@ import cv2
 import matplotlib.pyplot as plt
 import imutils
 import file_manager as fm
-import test
 import size_classification
 kernel = np.ones((5,5), np.uint8)
 
@@ -189,6 +188,7 @@ def get_test_train_sep(percentage,dif = 150):
     imgs_files = [f for f in os.listdir(nut_dir)]
 
     images = []
+    images_size = []
     sizes = []
     i = 0
     for f in imgs_files:
@@ -201,23 +201,25 @@ def get_test_train_sep(percentage,dif = 150):
                 empty = cv2.imread('data_cinta/empty/empty' + id + '.png')
                 img_pair = cv2.imread(os.path.join(nut_dir, subNutId(f,pairs[id])))
                 empty_pair = cv2.imread('data_cinta/empty/empty' + pairs[id] + '.png')
+                img = np.concatenate((img_org, img_pair), axis=1)
+                img = cv2.resize(img, (4 * dif, 2 * dif))
                 if labels[i] == 0:
                     #test.findRadius(img_org, empty)
                     #test.findRadius(img_pair, empty_pair)
                     print(i)
                     print(f,labels[i+1])
-                    size1 = size_classification.findRadius(img_org, empty,i)
-                    size2 = size_classification.findRadius(img_pair, empty_pair,i)
+                    size1 = size_classification.findRadius(img_org, empty)
+                    size2 = size_classification.findRadius(img_pair, empty_pair)
                     #print("pixeles camara 1:" + str(size1))
                     #print("pixeles camara 2:" + str(size2))
                     size = size_classification.sizes2rad(size1, size2, 120)
                     sizes.append(size)
+                    images_size.append(img)
                     print("Diametro: " + str(size))
                     i += 1
-                img = np.concatenate((img_org, img_pair), axis=1)
                 #get_nut(img_org,id)
             #img = get_nut(img)
-                img = cv2.resize(img,(4*dif, 2*dif))
+
                # plt.figure()
                # plt.imshow(img[:,:,::-1])
                # plt.show()

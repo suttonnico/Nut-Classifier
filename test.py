@@ -13,6 +13,9 @@ from skimage.draw import circle_perimeter
 from sklearn.linear_model import LinearRegression
 import math
 kernel = np.ones((3,3), np.uint8)
+from keras.models import load_model
+import cnn
+
 def addUp(x,dif):
     #print('MAT')
     #print(x)
@@ -40,7 +43,7 @@ def diffInColor(x,y):
         dif = 255
     dif = dif/255
     return dif
-
+"""
 def findRadius(img,empty):
     #plt.figure()
     #plt.imshow(img)
@@ -73,7 +76,7 @@ def findRadius(img,empty):
     y_max = np.max(y_edges)
     x_min = np.min(x_edges)
     x_max = np.max(x_edges)
-    cv2.rectangle(img, (x_min, y_min), (x_max, y_max), (0, 255, 0), 3)
+#    cv2.rectangle(img, (x_min, y_min), (x_max, y_max), (0, 255, 0), 3)
     plt.figure()
     plt.subplot(121)
     plt.imshow(edges,cmap='gray')
@@ -94,12 +97,12 @@ def findRadius(img,empty):
     fig, ax = plt.subplots(ncols=1, nrows=1, figsize=(10, 4))
     image = color.gray2rgb(img)
 
-    circy, circx = circle_perimeter(cy[maxR], cx[maxR], radii[maxR])
-    image[circy, circx] = (220, 20, 20)
+    #circy, circx = circle_perimeter(cy[maxR], cx[maxR], radii[maxR])
+    #image[circy, circx] = (220, 20, 20)
 
 #    ax.imshow(image, cmap=plt.cm.gray)
  #   plt.show()
-    dif = 40
+    dif = 50
     yMin = 0
     yMax = N
     xMin = 0
@@ -134,24 +137,42 @@ def findRadius(img,empty):
     rows=N
     cols = M
 
-    Mat = cv2.getRotationMatrix2D((cols / 2, rows / 2), math.atan(1/lm3.coef_[0]), 1)
-    dst = cv2.warpAffine(img, Mat, (M, N))
-    plt.figure()
-    plt.imshow(dst)
-    plt.show()
-    return radii[maxR]
+    Mat = cv2.getRotationMatrix2D((cols / 2, rows / 2), math.atan(lm3.coef_[0])*360/2/3.1415, 1)
+    rot_img = cv2.warpAffine(img, Mat, (M, N))
 
+    rot_empty = cv2.warpAffine(empty, Mat, (M, N))
+
+    findRadius(rot_img, rot_empty)
+
+    return radii[maxR]
+"""
 import size_classification
 import cv2
 
-img1 = cv2.imread('test/data/nuez0_000000.png')
+model = load_model('model_backup.h5')
+weights = model.get_weights()
+
+size = 150
+W = 2*size
+H = 2*size
+
+my_cnn = cnn.cnn(img_width=W, img_height=H)
+my_cnn.set_weights(weights)
+
+img1 = cv2.imread('data_cinta/good__02/nuez0_000050.png')
 img2 = cv2.imread('test/data/nuez6_000000.png')
-empty1 = cv2.imread('test/data/empty0.png')
+img = np.concatenate((img1, img2), axis=1)
+img = cv2.resize(img, (4 * size, 2 * size))
+
+pred = my_cnn.predict_classes(img.reshape([-1, 300, 600, 3]), batch_size=1)
+print(pred)
+exit(1111)
+empty1 = cv2.imread('data_cinta/empty/empty0.png')
 empty2 = cv2.imread('test/data/empty6.png')
 print("start")
-size1 = size_classification.findRadius(img1, empty1,0)
+size1 = findRadius(img1, empty1)
 print("start")
-size2 = size_classification.findRadius(img2, empty2,0)
+size2 = findRadius(img2, empty2)
 print("pixeles camara 1:" + str(size1))
 print("pixeles camara 2:" + str(size2))
 print("Diametro: " + str(size_classification.sizes2rad(size1, size2, 120)))

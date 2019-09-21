@@ -1,6 +1,8 @@
 import numpy as np
 import cv2
 from skimage.feature import canny
+from skimage.transform import hough_circle, hough_circle_peaks
+from sklearn.linear_model import LinearRegression
 import math
 import time
 import matplotlib.pyplot as plt
@@ -59,8 +61,7 @@ def diffInColor2(R, G, B):
     dif = dif / 255
     return dif
 
-
-def findRadius(img, empty,id):
+def findEdges(img, empty):
     test_id = 191
     start = time.time()
     kernel = np.ones((5, 5), np.uint8)
@@ -86,18 +87,34 @@ def findRadius(img, empty,id):
         RG = RG > th
         RB = RB > th
         GB = GB > th
-        diff = np.multiply(diff, RG)
-        diff = np.multiply(diff, RB)
-        diff = np.multiply(diff, GB)
-        diff = np.clip(diff, 0, 255) + diff_pre
+        mask = np.logical_or(RG,RB)
+        mask = np.logical_or(mask, GB)
+        diff = np.multiply(diff, mask)
+        diff = np.clip(diff, 0, 255)/255 + diff_pre/255
         # diff =vdiff(diff_pre[:,:,0],diff_pre[:,:,1],diff_pre[:,:,2])
-        diff = cv2.resize(diff, (120, 160))
-    else:
-         for i in range(int(N / step)):
+        diff = cv2.resize(diff, (160, 120))
+        #print(diff)
+        """
+        diff = np.zeros([N, M])
+        for i in range(int(N / step)):
             for j in range(int(M / step)):
                 diff[i * step:i * step + step, j * step:j * step + step] = diffInColor(
                     addUp(img[i * step:i * step + step, j * step:j * step + step], step),
                     addUp(empty[i * step:i * step + step, j * step:j * step + step], step))
+        
+        print('DIFF1')
+        print(np.max(diff_1))
+        print('diff_2')
+        print(np.max(diff))
+        print('DIV')
+        print(np.divide(diff,diff_1))
+        plt.figure()
+        plt.subplot(121)
+        plt.imshow(diff,cmap='gray')
+        plt.subplot(122)
+        plt.imshow(diff_1, cmap='gray')
+        plt.show()
+        """
     #print("tiempo en la clasifiacion por imagenes: " + str(time.time() - start))
     its = 3
     diff = cv2.dilate(diff, kernel, iterations=its)
@@ -109,7 +126,34 @@ def findRadius(img, empty,id):
     while not edges.any():
         trash, diff_after = cv2.threshold(diff_pre, th, 1, cv2.THRESH_BINARY)
         edges = canny(diff_after, sigma=6)
-        th = th/2
+        th = th / 2
+    return edges,diff
+
+def findRadius(img, empty):
+    [N, M, D] = np.shape(img)
+
+    Mat = cv2.getRotationMatrix2D((M / 2, N / 2), findRot(img,empty), 1)
+    rot_img = cv2.warpAffine(img, Mat, (M, N))
+
+    rot_empty = cv2.warpAffine(empty, Mat, (M, N))
+
+    [edges,diff] = findEdges(rot_img,rot_empty)
+    [y_edges, x_edges] = np.nonzero(edges)
+    y_min = np.min(y_edges)
+    y_max = np.max(y_edges)
+
+    return y_max - y_min
+
+
+def findRot(img, empty):
+    [N, M, D] = np.shape(img)
+    [edges,diff] = findEdges(img, empty)
+
+    diff_pre = diff
+    while not edges.any():
+        trash, diff_after = cv2.threshold(diff_pre, th, 1, cv2.THRESH_BINARY)
+        edges = canny(diff_after, sigma=6)
+        th = th / 2
     [y_edges, x_edges] = np.nonzero(edges)
     y_min = np.min(y_edges)
     y_max = np.max(y_edges)
@@ -117,4 +161,34 @@ def findRadius(img, empty,id):
     x_max = np.max(x_edges)
     # cv2.rectangle(img, (x_min, y_min), (x_max, y_max), (0, 255, 0), 3)
 
-    return y_max - y_min
+    hough_radii = np.arange(10, 30, 5)
+    hough_res = hough_circle(edges, hough_radii)
+    accums, cx, cy, radii = hough_circle_peaks(hough_res, hough_radii,
+                                               total_num_peaks=10)
+    maxR = np.argmax(radii)
+    dif = 50
+    yMin = 0
+    yMax = N
+    xMin = 0
+    xMax = M
+    if cy[maxR] - dif > 0:
+        yMin = cy[maxR] - dif
+    if cy[maxR] + dif < N:
+        yMax = cy[maxR] + dif
+    if cx[maxR] - dif > 0:
+        xMin = cx[maxR] - dif
+    if cx[maxR] + dif < M:
+        xMax = cx[maxR] + dif
+    nutImg = diff[yMin:yMax, xMin:xMax]
+
+    # plt.figure()
+    # plt.imshow(nutImg,cmap='gray')
+    # plt.show()
+    [y_n, x_n] = np.nonzero(nutImg)
+    y_n = y_n.reshape(-1, 1)
+    x_n = x_n.reshape(-1, 1)
+    lm3 = LinearRegression()
+    lm3.fit(x_n, y_n)
+
+
+    return math.atan(lm3.coef_[0]) * 360 / 2 / 3.1415
