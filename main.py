@@ -1,3 +1,4 @@
+
 from keras import layers, models, optimizers
 import sklearn
 import itertools
@@ -14,11 +15,11 @@ W = 2*size
 H = 2*size
 
 
-train_imgs,train_lbls,test_imgs,test_lbls = get_test_train_sep(0.8,dif=size)
+train_imgs,train_lbls,test_imgs,test_lbls = get_test_train_sep(0.5,dif=size)
 my_cnn = cnn.cnn(img_width=W, img_height=H)
 
-batch_size = 50
-epochs = 500
+batch_size = 200
+epochs = 1000
 # train
 print(np.shape(train_imgs))
 #exit()

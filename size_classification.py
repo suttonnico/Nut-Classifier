@@ -7,6 +7,8 @@ import math
 import time
 import matplotlib.pyplot as plt
 
+rotation = False
+
 def sizes2rad(size1, size2, T):
     tv = 0.51
     L = 20
@@ -70,7 +72,7 @@ def findEdges(img, empty):
     step = 3
 
     if True:
-        div = 3
+        div = 10
         img_small = cv2.resize(img, (int(160 / div), int(120 / div))).astype(int)
         empty_small = cv2.resize(empty, (int(160 / div), int(120 / div))).astype(int)
         diff_pre = np.absolute(img_small - empty_small)
@@ -131,13 +133,13 @@ def findEdges(img, empty):
 
 def findRadius(img, empty):
     [N, M, D] = np.shape(img)
-
-    Mat = cv2.getRotationMatrix2D((M / 2, N / 2), findRot(img,empty), 1)
-    rot_img = cv2.warpAffine(img, Mat, (M, N))
-
-    rot_empty = cv2.warpAffine(empty, Mat, (M, N))
-
-    [edges,diff] = findEdges(rot_img,rot_empty)
+    if rotation:
+        Mat = cv2.getRotationMatrix2D((M / 2, N / 2), findRot(img,empty), 1)
+        rot_img = cv2.warpAffine(img, Mat, (M, N))
+        rot_empty = cv2.warpAffine(empty, Mat, (M, N))
+        [edges,diff] = findEdges(rot_img,rot_empty)
+    else:
+        [edges, diff] = findEdges(img, empty)
     [y_edges, x_edges] = np.nonzero(edges)
     y_min = np.min(y_edges)
     y_max = np.max(y_edges)
