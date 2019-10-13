@@ -5,17 +5,21 @@ import itertools
 import numpy as np
 import matplotlib.pylab as plt
 import cnn
+import seaborn as sns
 from keras.callbacks import EarlyStopping
-from sets_generator import get_test_train_sep
+from sets_generator import get_test_train
 from keras.callbacks import ModelCheckpoint
 from keras.callbacks import TensorBoard
+import tensorflow as tf
 from time import time
+from sklearn.metrics import classification_report, confusion_matrix
+from cm import plot_confusion_matrix
 size = 150
 W = 2*size
 H = 2*size
 
 
-train_imgs,train_lbls,test_imgs,test_lbls = get_test_train_sep(0.5,dif=size)
+train_imgs,train_lbls,test_imgs,test_lbls = get_test_train_sep(0.8,dif=size)
 my_cnn = cnn.cnn(img_width=W, img_height=H)
 
 batch_size = 200
@@ -49,4 +53,19 @@ plt.plot(history.history['val_loss'],label='test accuracy')
 plt.ylabel('Loss')
 plt.xlabel('epoch')
 plt.legend(loc='lower right')
+plt.show()
+
+#Confution Matrix and Classification Report
+Y_pred = my_cnn.predict_classes(test_imgs,batch_size=int(len(test_imgs)/10))
+y_pred = np.argmax(Y_pred, axis=1)
+#print(Y_pred)
+#print(y_pred)
+print(test_lbls)
+con_mat =  confusion_matrix(test_lbls, Y_pred)
+print(con_mat)
+figure = plt.figure(figsize=(8, 8))
+sns.heatmap(con_mat, annot=True,cmap=plt.cm.Blues)
+plt.tight_layout()
+plt.ylabel('True label')
+plt.xlabel('Predicted label')
 plt.show()
