@@ -65,6 +65,8 @@ weights = load_model('model_sep_6.h5').get_weights()
 my_cnn_2 = cnn.cnn_sep(img_width=W, img_height=H)
 my_cnn_2.set_weights(weights)
 
+
+pred_0_6 = predictor(my_cnn_1,my_cnn_2)
 weights = load_model('model_sep_2.h5').get_weights()
 my_cnn_1 = cnn.cnn_sep(img_width=W, img_height=H)
 my_cnn_1.set_weights(weights)
@@ -75,7 +77,7 @@ my_cnn_2.set_weights(weights)
 pred_2_4 = predictor(my_cnn_1,my_cnn_2)
 
 
-pred_0_6 = predictor(my_cnn_1,my_cnn_2)
+
 out = []
 p=0
 for f in new_imgs_files:
@@ -88,6 +90,7 @@ for f in new_imgs_files:
             img_pair = cv2.imread(os.path.join(nut_dir_sep, subNutId(f, pair_id)))
             #predic = pred.predict(img_org,img_org)
             p=pred_0_6.predict(img_org.reshape([-1, 120, 160, 3]),img_pair.reshape([-1, 120, 160, 3]))
+            out.append(p)
             print(f+" :" + str(p))
         if id == '2':
             pair_id = pairs[id]
@@ -96,7 +99,8 @@ for f in new_imgs_files:
             #predic = pred.predict(img_org,img_org)
             p=pred_2_4.predict(img_org.reshape([-1, 120, 160, 3]),img_pair.reshape([-1, 120, 160, 3]))
             print(f+" :" + str(p))
-        out.append(p)
+            out.append(p)
 
 print("Performance = "+str(sum(out)/len(out)))
+print("buenas: "+str(len(out)-sum(out))+" totales: "+str(len(out)))
 
