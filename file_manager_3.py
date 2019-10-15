@@ -37,8 +37,26 @@ if __name__ == '__main__':
     last_nut_4 = 0
     last_nut_6 = 0
 
-    new_nut_dir_arr = ['data_cinta/bad_06','data_cinta/good_07','data_cinta/good_06','data_cinta/good_05','data_cinta/good_04','data_cinta/bad_05','data_cinta/bad_04','data_cinta/bad_03','data_cinta/bad_02','data_cinta/bad_01','data_cinta/good_01','data_cinta/good__02','data_cinta/good_03']
-    good_or_bad_arr = [1,0,0,0,0,1,1,1,1,1,0,0,0] #1= mala 0 = nuez buena
+    new_nut_dir_arr = ['data_cinta/bad_09',
+                       'data_cinta/bad_08',
+                       'data_cinta/bad_07',
+                       'data_cinta/good_10',
+                       'data_cinta/good_09',
+                       'data_cinta/bad_06',
+                       'data_cinta/good_07',
+                       'data_cinta/good_06',
+                       'data_cinta/good_05',
+                       'data_cinta/good_04',
+                       'data_cinta/bad_05',
+                       'data_cinta/bad_04',
+                       'data_cinta/bad_03',
+                       'data_cinta/bad_02',
+                       'data_cinta/bad_01',
+                       'data_cinta/good_01',
+                       'data_cinta/good__02',
+                       'data_cinta/good_03',
+                       'data_cinta/good_11']
+    good_or_bad_arr = [1,1,1,0,0,1,0,0,0,0,1,1,1,1,1,0,0,0,0] #1= mala 0 = nuez buena
     labels_0 = []  # np.genfromtxt('data_cinta/dataset/labels.csv', delimiter=',')
     labels_2 = []
     labels_4 = []

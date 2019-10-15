@@ -253,10 +253,10 @@ def get_test_train(percentage,dif = 150):
             test_lbls.append(sh_labels[i])
     return np.array(train_imgs),np.array(train_lbls),np.array(test_imgs),np.array(test_lbls)
 
-def get_test_train_sep(percentage,dif = 150):
-    nut_dir = 'data_cinta/dataset_6'
+def get_test_train_sep(percentage,id,dif = 150):
+    nut_dir = 'data_cinta/dataset_'+id
 
-    labels = np.genfromtxt('data_cinta/dataset_6/labels.csv', delimiter=',')
+    labels = np.genfromtxt('data_cinta/dataset_'+id+'/labels.csv', delimiter=',')
     imgs_files = [f for f in os.listdir(nut_dir)]
     print(labels)
     print("bad: "+str(sum(labels))+" good: "+str(len(labels)-sum(labels)))

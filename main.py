@@ -19,7 +19,7 @@ W = 2*size
 H = 2*size
 
 
-train_imgs,train_lbls,test_imgs,test_lbls = get_test_train_sep(0.8,dif=size)
+train_imgs,train_lbls,test_imgs,test_lbls = get_test_train(0.7,dif=size)
 my_cnn = cnn.cnn(img_width=W, img_height=H)
 
 batch_size = 200

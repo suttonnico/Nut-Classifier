@@ -40,7 +40,7 @@ my_cnn.set_weights(weights)
 
 labels = np.genfromtxt('data_cinta/dataset/labels.csv', delimiter=',')
 
-nut_dir_sep = 'data_cinta/dataset_sep'
+nut_dir_sep = 'data_cinta/good_11'
 
 pairs = {
     '0': '6',
