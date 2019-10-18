@@ -7,7 +7,7 @@ import math
 import time
 import matplotlib.pyplot as plt
 
-rotation = False
+rotation = True
 
 def sizes2rad(size1, size2, T):
     tv = 0.51
@@ -69,10 +69,10 @@ def findEdges(img, empty):
     kernel = np.ones((5, 5), np.uint8)
     [N, M, D] = np.shape(img)
     diff = np.zeros([N, M])
-    step = 3
+    step = 5
 
     if True:
-        div = 10
+        div = 5
         img_small = cv2.resize(img, (int(160 / div), int(120 / div))).astype(int)
         empty_small = cv2.resize(empty, (int(160 / div), int(120 / div))).astype(int)
         diff_pre = np.absolute(img_small - empty_small)
@@ -84,17 +84,29 @@ def findEdges(img, empty):
         RB = np.abs(R - B)
         GB = np.abs(G - B)
         diff = (R + G + B) / 3
-        diff_pre = diff * 0.001
-        th = 40
+        #diff += cv2.cvtColor(diff_pre, cv2.COLOR_BGR2GRAY) * 0.0001
+        th = 30
         RG = RG > th
         RB = RB > th
         GB = GB > th
         mask = np.logical_or(RG,RB)
         mask = np.logical_or(mask, GB)
         diff = np.multiply(diff, mask)
-        diff = np.clip(diff, 0, 255)/255 + diff_pre/255
+        diff = np.clip(diff, 0, 255)/255 #+ diff_pre/255
         # diff =vdiff(diff_pre[:,:,0],diff_pre[:,:,1],diff_pre[:,:,2])
+        #plt.figure()
+        #plt.imshow(diff,cmap='gray')
+        #plt.show()
         diff = cv2.resize(diff, (160, 120))
+        vert = np.sum(diff,axis=1)
+        vert = np.convolve(vert,np.blackman(20))
+        n= np.arange(len(vert))
+        plt.figure()
+        plt.subplot(121)
+        plt.imshow(diff,cmap='gray')
+        plt.subplot(122)
+        plt.plot(vert,np.flip(n,axis=0))
+        plt.show()
         #print(diff)
         """
         diff = np.zeros([N, M])
@@ -103,31 +115,26 @@ def findEdges(img, empty):
                 diff[i * step:i * step + step, j * step:j * step + step] = diffInColor(
                     addUp(img[i * step:i * step + step, j * step:j * step + step], step),
                     addUp(empty[i * step:i * step + step, j * step:j * step + step], step))
-        
-        print('DIFF1')
-        print(np.max(diff_1))
-        print('diff_2')
-        print(np.max(diff))
-        print('DIV')
-        print(np.divide(diff,diff_1))
-        plt.figure()
-        plt.subplot(121)
-        plt.imshow(diff,cmap='gray')
-        plt.subplot(122)
-        plt.imshow(diff_1, cmap='gray')
-        plt.show()
         """
+        #plt.figure()
+        #plt.subplot(121)
+        #plt.imshow(diff,cmap='gray')
+        #plt.subplot(122)
+        #plt.imshow(diff_1, cmap='gray')
+        #plt.show()
+
     #print("tiempo en la clasifiacion por imagenes: " + str(time.time() - start))
     its = 3
     diff = cv2.dilate(diff, kernel, iterations=its)
     diff = cv2.erode(diff, None, iterations=its)
 
-    th = 0.3
-    edges = canny(diff, sigma=6)
+    th = 0.4
+    sig = 6
+    edges = canny(diff, sigma=sig)
     diff_pre = diff
     while not edges.any():
         trash, diff_after = cv2.threshold(diff_pre, th, 1, cv2.THRESH_BINARY)
-        edges = canny(diff_after, sigma=6)
+        edges = canny(diff_after, sigma=sig)
         th = th / 2
     return edges,diff
 
@@ -141,10 +148,16 @@ def findRadius(img, empty):
     else:
         [edges, diff] = findEdges(img, empty)
     [y_edges, x_edges] = np.nonzero(edges)
+    #plt.figure()
+    #plt.subplot(121)
+    #plt.imshow(img)
+    #plt.subplot(122)
+    #plt.imshow(edges)
+    #plt.show()
     y_min = np.min(y_edges)
     y_max = np.max(y_edges)
 
-    return y_max - y_min
+    return y_max-y_min
 
 
 def findRot(img, empty):
@@ -183,9 +196,9 @@ def findRot(img, empty):
         xMax = cx[maxR] + dif
     nutImg = diff[yMin:yMax, xMin:xMax]
 
-    # plt.figure()
-    # plt.imshow(nutImg,cmap='gray')
-    # plt.show()
+    #plt.figure()
+    #plt.imshow(nutImg,cmap='gray')
+    #plt.show()
     [y_n, x_n] = np.nonzero(nutImg)
     y_n = y_n.reshape(-1, 1)
     x_n = x_n.reshape(-1, 1)
