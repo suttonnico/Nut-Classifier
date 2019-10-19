@@ -63,147 +63,52 @@ def diffInColor2(R, G, B):
     dif = dif / 255
     return dif
 
-def findEdges(img, empty):
-    test_id = 191
-    start = time.time()
-    kernel = np.ones((5, 5), np.uint8)
-    [N, M, D] = np.shape(img)
-    diff = np.zeros([N, M])
-    step = 5
-
-    if True:
-        div = 5
-        img_small = cv2.resize(img, (int(160 / div), int(120 / div))).astype(int)
-        empty_small = cv2.resize(empty, (int(160 / div), int(120 / div))).astype(int)
-        diff_pre = np.absolute(img_small - empty_small)
-
-        R = diff_pre[:, :, 0]
-        G = diff_pre[:, :, 1]
-        B = diff_pre[:, :, 2]
-        RG = np.abs(R - G)
-        RB = np.abs(R - B)
-        GB = np.abs(G - B)
-        diff = (R + G + B) / 3
-        #diff += cv2.cvtColor(diff_pre, cv2.COLOR_BGR2GRAY) * 0.0001
-        th = 30
-        RG = RG > th
-        RB = RB > th
-        GB = GB > th
-        mask = np.logical_or(RG,RB)
-        mask = np.logical_or(mask, GB)
-        diff = np.multiply(diff, mask)
-        diff = np.clip(diff, 0, 255)/255 #+ diff_pre/255
-        # diff =vdiff(diff_pre[:,:,0],diff_pre[:,:,1],diff_pre[:,:,2])
-        #plt.figure()
-        #plt.imshow(diff,cmap='gray')
-        #plt.show()
-        diff = cv2.resize(diff, (160, 120))
-        vert = np.sum(diff,axis=1)
-        vert = np.convolve(vert,np.blackman(20))
-        n= np.arange(len(vert))
-        plt.figure()
-        plt.subplot(121)
-        plt.imshow(diff,cmap='gray')
-        plt.subplot(122)
-        plt.plot(vert,np.flip(n,axis=0))
-        plt.show()
-        #print(diff)
-        """
-        diff = np.zeros([N, M])
-        for i in range(int(N / step)):
-            for j in range(int(M / step)):
-                diff[i * step:i * step + step, j * step:j * step + step] = diffInColor(
-                    addUp(img[i * step:i * step + step, j * step:j * step + step], step),
-                    addUp(empty[i * step:i * step + step, j * step:j * step + step], step))
-        """
-        #plt.figure()
-        #plt.subplot(121)
-        #plt.imshow(diff,cmap='gray')
-        #plt.subplot(122)
-        #plt.imshow(diff_1, cmap='gray')
-        #plt.show()
-
-    #print("tiempo en la clasifiacion por imagenes: " + str(time.time() - start))
-    its = 3
-    diff = cv2.dilate(diff, kernel, iterations=its)
-    diff = cv2.erode(diff, None, iterations=its)
-
-    th = 0.4
-    sig = 6
-    edges = canny(diff, sigma=sig)
-    diff_pre = diff
-    while not edges.any():
-        trash, diff_after = cv2.threshold(diff_pre, th, 1, cv2.THRESH_BINARY)
-        edges = canny(diff_after, sigma=sig)
-        th = th / 2
-    return edges,diff
-
 def findRadius(img, empty):
     [N, M, D] = np.shape(img)
-    if rotation:
-        Mat = cv2.getRotationMatrix2D((M / 2, N / 2), findRot(img,empty), 1)
-        rot_img = cv2.warpAffine(img, Mat, (M, N))
-        rot_empty = cv2.warpAffine(empty, Mat, (M, N))
-        [edges,diff] = findEdges(rot_img,rot_empty)
-    else:
-        [edges, diff] = findEdges(img, empty)
-    [y_edges, x_edges] = np.nonzero(edges)
+    div = 7
+    img_small = cv2.resize(img, (int(160 / div), int(120 / div))).astype(int)
+    empty_small = cv2.resize(empty, (int(160 / div), int(120 / div))).astype(int)
+    diff_pre = np.absolute(img_small - empty_small)
+
+    R = diff_pre[:, :, 0]
+    G = diff_pre[:, :, 1]
+    B = diff_pre[:, :, 2]
+    RG = np.abs(R - G)
+    RB = np.abs(R - B)
+    GB = np.abs(G - B)
+    diff = (R + G + B) / 3
+    #diff = diff+cv2.cvtColor(diff_pre, cv2.COLOR_BGR2GRAY) * 0.0001
+    th = 30
+    RG = RG > th
+    RB = RB > th
+    GB = GB > th
+    mask = np.logical_or(RG, RB)
+    mask = np.logical_or(mask, GB)
+    diff = np.multiply(diff, mask)
+    diff = np.clip(diff, 0, 255) / 255  # + diff_pre/255
+    # diff =vdiff(diff_pre[:,:,0],diff_pre[:,:,1],diff_pre[:,:,2])
+    # plt.figure()
+    # plt.imshow(diff,cmap='gray')
+    # plt.show()
+    M = 50
+    per = 0.2
+    diff = cv2.resize(diff, (160, 120))
+    vert = np.sum(diff, axis=1)
+    vert = np.convolve(vert, np.blackman(M))
+    th = np.max(vert)*per
+    size = len(vert)-np.argmax(np.flip(vert,axis=0) > th)-np.argmax(vert>th)
+    size_v = size/len(vert)*120*1.1
+    hor = np.sum(diff, axis=0)
+    hor = np.convolve(hor, np.blackman(M))
+    th = np.max(vert) * per
+    size = len(hor) - np.argmax(np.flip(hor, axis=0) > th) - np.argmax(hor > th)
+    size_h = size / len(hor) * 160*1.1
+    #print("sizev:"+str(size_v)+"    sizeH:"+str(size_h))
     #plt.figure()
     #plt.subplot(121)
-    #plt.imshow(img)
-    #plt.subplot(122)
-    #plt.imshow(edges)
-    #plt.show()
-    y_min = np.min(y_edges)
-    y_max = np.max(y_edges)
+    #plt.
+    if size_h<size_v:
+        return size_h
+    else:
+        return size_v
 
-    return y_max-y_min
-
-
-def findRot(img, empty):
-    [N, M, D] = np.shape(img)
-    [edges,diff] = findEdges(img, empty)
-
-    diff_pre = diff
-    while not edges.any():
-        trash, diff_after = cv2.threshold(diff_pre, th, 1, cv2.THRESH_BINARY)
-        edges = canny(diff_after, sigma=6)
-        th = th / 2
-    [y_edges, x_edges] = np.nonzero(edges)
-    y_min = np.min(y_edges)
-    y_max = np.max(y_edges)
-    x_min = np.min(x_edges)
-    x_max = np.max(x_edges)
-    # cv2.rectangle(img, (x_min, y_min), (x_max, y_max), (0, 255, 0), 3)
-
-    hough_radii = np.arange(10, 30, 5)
-    hough_res = hough_circle(edges, hough_radii)
-    accums, cx, cy, radii = hough_circle_peaks(hough_res, hough_radii,
-                                               total_num_peaks=10)
-    maxR = np.argmax(radii)
-    dif = 50
-    yMin = 0
-    yMax = N
-    xMin = 0
-    xMax = M
-    if cy[maxR] - dif > 0:
-        yMin = cy[maxR] - dif
-    if cy[maxR] + dif < N:
-        yMax = cy[maxR] + dif
-    if cx[maxR] - dif > 0:
-        xMin = cx[maxR] - dif
-    if cx[maxR] + dif < M:
-        xMax = cx[maxR] + dif
-    nutImg = diff[yMin:yMax, xMin:xMax]
-
-    #plt.figure()
-    #plt.imshow(nutImg,cmap='gray')
-    #plt.show()
-    [y_n, x_n] = np.nonzero(nutImg)
-    y_n = y_n.reshape(-1, 1)
-    x_n = x_n.reshape(-1, 1)
-    lm3 = LinearRegression()
-    lm3.fit(x_n, y_n)
-
-
-    return math.atan(lm3.coef_[0]) * 360 / 2 / 3.1415
