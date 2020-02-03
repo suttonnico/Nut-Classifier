@@ -55,8 +55,10 @@ if __name__ == '__main__':
                        'data_cinta/good_01',
                        'data_cinta/good__02',
                        'data_cinta/good_03',
-                       'data_cinta/good_11']
-    good_or_bad_arr = [1,1,1,0,0,1,0,0,0,0,1,1,1,1,1,0,0,0,0] #1= mala 0 = nuez buena
+                       'data_cinta/good_11',
+                       'data_cinta/good_12',
+                       'data_cinta/good_13']
+    good_or_bad_arr = [1,1,1,0,0,1,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0] #1= mala 0 = nuez buena
     labels_0 = []  # np.genfromtxt('data_cinta/dataset/labels.csv', delimiter=',')
     labels_2 = []
     labels_4 = []

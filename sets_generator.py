@@ -194,6 +194,7 @@ def get_test_train(percentage,dif = 150):
     i = 0
     for f in imgs_files:
         if f != 'labels.csv':
+
             id = getNutId(f)
             num = getNutNumber(f)
 

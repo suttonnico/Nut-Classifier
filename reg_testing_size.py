@@ -9,7 +9,7 @@ size = 150
 W = 2*size
 H = 2*size
 
-nut_dir_sep = 'data_cinta/size_test2'
+nut_dir_sep = 'data_cinta/good_13'
 
 def zero_pad(x,n):
     for i in range(1,5):
