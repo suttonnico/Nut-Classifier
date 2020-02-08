@@ -254,6 +254,46 @@ def get_test_train(percentage,dif = 150):
             test_lbls.append(sh_labels[i])
     return np.array(train_imgs),np.array(train_lbls),np.array(test_imgs),np.array(test_lbls)
 
+def get_test_train_red(percentage,id,dif=150):
+    nut_dir = 'data_cinta/dataset_' + id
+
+    labels = np.genfromtxt('data_cinta/dataset_' + id + '/labels.csv', delimiter=',')
+    imgs_files = [f for f in os.listdir(nut_dir)]
+    print(labels)
+    print("bad: " + str(sum(labels)) + " good: " + str(len(labels) - sum(labels)))
+    images = []
+    images_size = []
+    sizes = []
+    i = 0
+    for f in imgs_files:
+        if f != 'labels.csv':
+            id = getNutId(f)
+            num = getNutNumber(f)
+            img = cv2.imread(os.path.join(nut_dir, f))  # img.shape ~ (2919, 3000)
+
+            images.append(img)
+
+    inds = np.arange(len(labels))
+    np.random.shuffle(inds)
+    sh_images = []
+    sh_labels = np.zeros(len(labels))
+    for i in range(len(labels)):
+        sh_labels[i] = labels[inds[i]]
+        sh_images.append(images[inds[i]])
+    train_imgs = []
+    train_lbls = []
+    test_imgs = []
+    test_lbls = []
+    for i in range(len(labels)):
+        if i / len(labels) < percentage:
+            train_imgs.append(sh_images[i])
+            train_lbls.append(sh_labels[i])
+        else:
+            test_imgs.append(sh_images[i])
+            test_lbls.append(sh_labels[i])
+    return np.array(train_imgs), np.array(train_lbls), np.array(test_imgs), np.array(test_lbls)
+
+
 def get_test_train_sep(percentage,id,dif = 150):
     nut_dir = 'data_cinta/dataset_'+id
 
