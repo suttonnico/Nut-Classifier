@@ -1,17 +1,17 @@
 from keras import layers, models, optimizers
 import numpy as np
 
-def cnn_sep(img_width=640, img_height=480):
+div = 3
+def cnn_sep(img_width=int(160 / div), img_height=int(120 / div)):
     # https://www.kaggle.com/crawford/lung-infiltration-cnn-with-keras-on-chest-x-rays
     layer_C1 = 20
     layer_C2 = 20
     dense_layer = 200
     model = models.Sequential()
-    model.add(layers.Conv2D(layer_C1, (3, 3), input_shape=(img_height,img_width,3),strides=1))
+    model.add(layers.Dense(layer_C1,  input_shape=(img_height, img_width, 3)))
     model.add(layers.BatchNormalization())
     model.add(layers.Activation("relu"))
-    model.add(layers.MaxPool2D((3,3)))
-    model.add(layers.Dropout(0.2))
+    model.add(layers.MaxPool2D((3, 3)))
     model.add(layers.Conv2D(layer_C2, (3, 3)))
     model.add(layers.BatchNormalization())
     model.add(layers.Activation("relu"))
@@ -29,7 +29,7 @@ def cnn_sep(img_width=640, img_height=480):
 
     model.compile(
         loss='binary_crossentropy',
-        optimizer=optimizers.Adam(lr=0.0001, beta_1=0.9999, beta_2=0.999, epsilon=None, decay=0.0),
+        optimizer=optimizers.Adam(lr=0.00001, epsilon=None, decay=0.00000),
         metrics=['acc'])
 
     model.summary()
@@ -38,8 +38,8 @@ def cnn_sep(img_width=640, img_height=480):
 
 def cnn(img_width=640, img_height=480):
     # https://www.kaggle.com/crawford/lung-infiltration-cnn-with-keras-on-chest-x-rays
-    layer_C1 = 10
-    layer_C2 = 20
+    layer_C1 = 200
+    layer_C2 = 100
     dense_layer = 200
     model = models.Sequential()
     model.add(layers.Conv2D(layer_C1, (5, 5), input_shape=(img_height,img_width*2,3),strides=3))
@@ -52,7 +52,11 @@ def cnn(img_width=640, img_height=480):
     model.add(layers.Activation("relu"))
     model.add(layers.MaxPool2D((2, 2)))
     model.add(layers.Dropout(0.2))
-
+    model.add(layers.Conv2D(layer_C2, (3, 3)))
+    model.add(layers.BatchNormalization())
+    model.add(layers.Activation("relu"))
+    model.add(layers.MaxPool2D((2, 2)))
+    model.add(layers.Dropout(0.2))
     model.add(layers.Flatten())
     model.add(layers.Dense(dense_layer))
     model.add(layers.BatchNormalization())

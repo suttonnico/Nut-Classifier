@@ -7,7 +7,7 @@ import file_manager as fm
 import size_classification
 kernel = np.ones((5,5), np.uint8)
 
-
+nut_dir_sep = 'data_cinta/good_13'
 def getNutId(x):
     return(x[11])
 
@@ -257,6 +257,8 @@ def get_test_train(percentage,dif = 150):
 def get_test_train_red(percentage,id,dif=150):
     nut_dir = 'data_cinta/dataset_' + id
 
+    empty = cv2.imread(os.path.join(nut_dir_sep, 'empty'+id+'.png'))
+
     labels = np.genfromtxt('data_cinta/dataset_' + id + '/labels.csv', delimiter=',')
     imgs_files = [f for f in os.listdir(nut_dir)]
     print(labels)
@@ -270,8 +272,8 @@ def get_test_train_red(percentage,id,dif=150):
             id = getNutId(f)
             num = getNutNumber(f)
             img = cv2.imread(os.path.join(nut_dir, f))  # img.shape ~ (2919, 3000)
-
-            images.append(img)
+            img_red = size_classification.get_red(img,empty)
+            images.append(img_red)
 
     inds = np.arange(len(labels))
     np.random.shuffle(inds)

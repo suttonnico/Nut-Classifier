@@ -62,10 +62,13 @@ def diffInColor2(R, G, B):
         dif = 255
     dif = dif / 255
     return dif
+def get_red(img,empty):
+    dif = findBorders(img,empty)
+    return dif
 
 def findBorders(img,empty):
     [N, M, D] = np.shape(img)
-    div = 7
+    div = 3
     img_small = cv2.resize(img, (int(160 / div), int(120 / div))).astype(int)
     empty_small = cv2.resize(empty, (int(160 / div), int(120 / div))).astype(int)
     diff_pre = np.absolute(img_small - empty_small)
@@ -76,7 +79,7 @@ def findBorders(img,empty):
     RG = np.abs(R - G)
     RB = np.abs(R - B)
     GB = np.abs(G - B)
-    diff = (R + G + B) / 3
+    diff_GRAY = (R + G + B) / 3
     # diff = diff+cv2.cvtColor(diff_pre, cv2.COLOR_BGR2GRAY) * 0.0001
     th = 30
     RG = RG > th
@@ -84,12 +87,56 @@ def findBorders(img,empty):
     GB = GB > th
     mask = np.logical_or(RG, RB)
     mask = np.logical_or(mask, GB)
-    diff = np.multiply(diff, mask)
+    diff = np.multiply(diff_GRAY, mask)
     diff = np.clip(diff, 0, 255) / 255  # + diff_pre/255
     # diff =vdiff(diff_pre[:,:,0],diff_pre[:,:,1],diff_pre[:,:,2])
-    # plt.figure()
-    # plt.imshow(diff,cmap='gray')
-    # plt.show()
+    M = 50
+    per = 0.2
+    diff = cv2.resize(diff, (160, 120))
+    vert = np.sum(diff, axis=1)
+    vert = np.convolve(vert, np.blackman(M))
+
+    th = np.max(vert) * per
+    size = len(vert) - np.argmax(np.flip(vert, axis=0) > th) - np.argmax(vert > th)
+    size_v = size / len(vert) * 120 * 1.1
+    hor = np.sum(diff, axis=0)
+    hor = np.convolve(hor, np.blackman(M))
+    #plt.figure()
+    #plt.subplot(121)
+    #plt.plot(np.arange(len(vert)), vert)
+    #plt.subplot(122)
+    #plt.plot(np.arange(len(hor)), hor)
+
+    th = np.max(vert) * per
+    size = len(hor) - np.argmax(np.flip(hor, axis=0) > th) - np.argmax(hor > th)
+    size_h = size / len(hor) * 160 * 1.1
+    #print(size_v,size_h)
+    top = max(int(np.argmax(vert > th)/ len(hor) * 120)-10,0)
+    bottom =  min(int(120- np.argmax(np.flip(vert, axis=0) > th)/ len(vert) * 120)+10,120)
+    left = max(int(np.argmax(hor > th)/ len(hor) * 160)-10,0)
+    right =  min(int(160- np.argmax(np.flip(hor, axis=0) > th)/ len(hor) * 160),160)
+    start_point = (left,top)
+    end_point = (right,bottom)
+    #print("START"+str(start_point))
+    #print("END"+str(end_point))
+    color = (255, 0, 0)
+    thickness = 4
+    img = cv2.rectangle(img, start_point, end_point, color, thickness)
+    #plt.figure()
+    #plt.subplot(121)
+    #plt.imshow(diff, cmap='gray')
+    #plt.subplot(122)
+    #plt.imshow(cv2.cvtColor(img[top:bottom,left:right,:], cv2.COLOR_BGR2RGB))
+    #plt.show()
+    return cv2.resize(img[top:bottom,left:right,:],(int(160/div),int(120/div)))
+
+    """
+    plt.figure()
+    plt.subplot(121)
+    plt.imshow(diff,cmap='gray')
+    plt.subplot(122)
+    plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+    plt.show()
     M = 50
     per = 0.2
     diff = cv2.resize(diff, (160, 120))
@@ -111,7 +158,7 @@ def findBorders(img,empty):
         return size_h
     else:
         return size_v
-
+ """
 def findRadius(img, empty):
     [N, M, D] = np.shape(img)
     div = 7
